@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Biblioteca Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#A94DA0;
+    --primary-dark:#7E3A7C;
+    --primary-light:#F0DCF0;
+    --bg:#FDF6FB;
+    --surface:#FFFFFF;
+    --mint:#A8E6CF;
+    --mint-dark:#4E9B7F;
+    --lavender:#D3C4F2;
+    --lavender-dark:#7A5FB0;
+    --sky:#AEDCF7;
+    --sky-dark:#3A87B3;
+    --pink:#F8C4DC;
+    --pink-dark:#C15E88;
+    --yellow:#F6E27D;
+    --yellow-dark:#A9860F;
+    --orange:#F5A85E;
+    --text:#4A3B49;
+    --text-soft:#8C7A88;
+    --border:#EEDCF0;
+    --shadow: 0 6px 20px rgba(169,77,160,0.10);
+    --radius-lg: 26px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.font-display{font-family:'Baloo 2', sans-serif;}
+  button{font-family:inherit; cursor:pointer;}
+  img,svg{display:block;}
+  a{color:inherit;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- App shell ---------- */
+  #app{
+    max-width:1200px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    display:flex;
+  }
+
+  .screen{
+    display:none;
+    width:100%;
+    animation:fadeIn .35s ease;
+  }
+  .screen.active{display:block;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .main-col{
+    flex:1;
+    min-width:0;
+    padding-bottom:96px;
+  }
+
+  /* ---------- Sidebar (desktop) ---------- */
+  .sidebar{
+    display:none;
+    width:230px;
+    flex-shrink:0;
+    padding:32px 18px;
+    border-right:1px solid var(--border);
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+  .sidebar .brand{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:36px; padding:0 10px;
+  }
+  .sidebar .brand-badge{width:40px;height:40px;flex-shrink:0;}
+  .sidebar .brand-name{font-size:1.05rem; font-weight:700; color:var(--primary-dark); line-height:1.15;}
+  .sidebar nav{display:flex; flex-direction:column; gap:6px;}
+  .side-link{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 14px; border-radius:var(--radius-sm);
+    border:none; background:none; color:var(--text-soft);
+    font-weight:700; font-size:0.98rem; text-align:left;
+  }
+  .side-link svg{width:22px;height:22px;}
+  .side-link.active{background:var(--primary-light); color:var(--primary-dark);}
+  .side-link:focus-visible, button:focus-visible, .card-cta:focus-visible, .search-input:focus-visible, .chip:focus-visible{
+    outline:3px solid var(--sky-dark); outline-offset:2px;
+  }
+
+  /* ---------- Top bar (mobile/tablet) ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 6px;
+  }
+  .topbar .brand{display:flex; align-items:center; gap:10px;}
+  .topbar .brand-badge{width:34px;height:34px;}
+  .topbar .brand-name{font-weight:700; font-size:1rem; color:var(--primary-dark);}
+
+  /* ---------- Bottom nav (mobile/tablet) ---------- */
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0;
+    max-width:1200px; margin:0 auto;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    display:flex;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 20px rgba(169,77,160,0.08);
+    z-index:40;
+  }
+  .nav-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:none; border:none; padding:8px 4px; border-radius:var(--radius-sm);
+    color:var(--text-soft); font-size:0.72rem; font-weight:700;
+  }
+  .nav-btn svg{width:24px;height:24px;}
+  .nav-btn.active{color:var(--primary-dark);}
+  .nav-btn.active .nav-icon-wrap{background:var(--primary-light);}
+  .nav-icon-wrap{border-radius:12px; padding:4px 14px;}
+
+  /* ================= WELCOME ================= */
+  .welcome-wrap{
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:40px 28px 48px; text-align:center;
+    background:
+      radial-gradient(circle at 15% 12%, var(--pink) 0%, transparent 40%),
+      radial-gradient(circle at 88% 18%, var(--sky) 0%, transparent 38%),
+      radial-gradient(circle at 85% 90%, var(--mint) 0%, transparent 40%),
+      var(--bg);
+  }
+  .welcome-illustration{width:min(280px, 70vw); margin-bottom:8px;}
+  .welcome-title{
+    font-size:clamp(1.9rem, 6vw, 2.6rem);
+    color:var(--primary-dark);
+    margin:18px 0 6px;
+    line-height:1.1;
+  }
+  .welcome-title span{color:var(--primary);}
+  .welcome-sub{
+    font-size:1.05rem; color:var(--text-soft); max-width:420px;
+    margin:0 0 30px; line-height:1.5;
+  }
+  .btn-primary{
+    background:var(--primary); color:#fff; border:none;
+    padding:17px 38px; border-radius:100px; font-size:1.08rem; font-weight:800;
+    box-shadow:0 8px 22px rgba(169,77,160,0.32);
+    display:inline-flex; align-items:center; gap:10px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(169,77,160,0.4);}
+  .btn-primary:active{transform:translateY(0);}
+  .welcome-tag{
+    margin-top:34px; font-size:0.85rem; color:var(--text-soft);
+    display:flex; align-items:center; gap:8px;
+  }
+
+  /* ================= SECTION HEADERS ================= */
+  .section-title{
+    font-size:1.35rem; margin:0 0 4px; color:var(--primary-dark);
+  }
+  .section-sub{margin:0 0 16px; color:var(--text-soft); font-size:0.93rem;}
+  .section-block{padding:0 20px; margin-bottom:30px;}
+
+  /* ================= HOME ================= */
+  .home-header{padding:4px 20px 18px;}
+  .home-greeting{font-size:1.5rem; color:var(--primary-dark); margin:6px 0 2px;}
+  .home-greeting-sub{color:var(--text-soft); margin:0; font-size:0.95rem;}
+
+  .search-bar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:2px solid var(--border);
+    border-radius:100px; padding:13px 20px; margin:0 20px 24px;
+    box-shadow:var(--shadow);
+  }
+  .search-bar svg{width:20px; height:20px; color:var(--text-soft); flex-shrink:0;}
+  .search-input{
+    border:none; outline:none; background:none; width:100%;
+    font-family:inherit; font-size:1rem; color:var(--text);
+  }
+  .search-input::placeholder{color:var(--text-soft);}
+
+  .chip-row{
+    display:flex; gap:12px; overflow-x:auto; padding:2px 20px 6px;
+    scrollbar-width:none;
+  }
+  .chip-row::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0; border:none; border-radius:var(--radius-md);
+    padding:14px 18px; display:flex; flex-direction:column; align-items:center; gap:6px;
+    min-width:92px; font-weight:700; font-size:0.82rem; color:var(--text);
+    box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  }
+  .chip .chip-icon{
+    width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+    background:rgba(255,255,255,0.55);
+  }
+  .chip.active{outline:3px solid var(--primary-dark);}
+
+  .h-scroll{display:flex; gap:16px; overflow-x:auto; padding:2px 20px 10px; scrollbar-width:none;}
+  .h-scroll::-webkit-scrollbar{display:none;}
+
+  /* ================= CARDS ================= */
+  .card{
+    background:var(--surface); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column;
+    border:1px solid var(--border);
+  }
+  .card-media{
+    height:120px; display:flex; align-items:center; justify-content:center;
+    font-size:2.6rem; position:relative;
+  }
+  .card-cat-tag{
+    position:absolute; top:10px; left:10px;
+    background:rgba(255,255,255,0.85); color:var(--text);
+    font-size:0.68rem; font-weight:800; padding:4px 10px; border-radius:100px;
+    letter-spacing:.02em;
+  }
+  .card-body{padding:14px 16px 16px; display:flex; flex-direction:column; gap:6px; flex:1;}
+  .card-title{font-family:'Baloo 2',sans-serif; font-size:1.05rem; color:var(--text); margin:0; line-height:1.25;}
+  .card-desc{font-size:0.87rem; color:var(--text-soft); margin:0; line-height:1.4; flex:1;}
+  .card-cta{
+    margin-top:8px; align-self:flex-start;
+    background:var(--primary-light); color:var(--primary-dark);
+    border:none; padding:10px 18px; border-radius:100px;
+    font-weight:800; font-size:0.85rem; display:flex; align-items:center; gap:6px;
+  }
+  .card-cta:hover{background:var(--primary); color:#fff;}
+  .card-cta svg{width:15px;height:15px;}
+
+  .featured-card{width:220px; flex-shrink:0;}
+  .recent-card{width:200px; flex-shrink:0;}
+
+  .fav-btn-mini{
+    position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%;
+    background:rgba(255,255,255,0.9); border:none; display:flex; align-items:center; justify-content:center;
+  }
+  .fav-btn-mini svg{width:16px; height:16px; color:var(--pink-dark);}
+
+  /* ================= LIBRARY GRID ================= */
+  .lib-grid{
+    display:grid; grid-template-columns:1fr; gap:18px; padding:0 20px 10px;
+  }
+  .lib-grid .card{flex-direction:row; align-items:stretch;}
+  .lib-grid .card-media{width:100px; height:auto; flex-shrink:0;}
+  .lib-grid .card-body{padding:14px 16px;}
+
+  .empty-state{
+    text-align:center; padding:50px 30px; color:var(--text-soft);
+  }
+  .empty-state svg{width:64px; height:64px; margin:0 auto 14px; color:var(--lavender-dark);}
+  .empty-state p{margin:4px 0; font-size:0.95rem;}
+  .empty-state strong{color:var(--text); font-family:'Baloo 2',sans-serif; font-size:1.1rem;}
+
+  /* ================= CONTENT DETAIL ================= */
+  .detail-header{
+    height:210px; display:flex; align-items:center; justify-content:center;
+    font-size:5rem; position:relative;
+  }
+  .back-btn{
+    position:absolute; top:16px; left:16px;
+    width:42px; height:42px; border-radius:50%; border:none;
+    background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 10px rgba(0,0,0,0.12);
+  }
+  .back-btn svg{width:20px;height:20px; color:var(--text);}
+  .fav-btn-lg{
+    position:absolute; top:16px; right:16px;
+    width:42px; height:42px; border-radius:50%; border:none;
+    background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 10px rgba(0,0,0,0.12);
+  }
+  .fav-btn-lg svg{width:20px;height:20px; color:var(--pink-dark);}
+  .fav-btn-lg.is-fav{background:var(--pink);}
+  .fav-btn-lg.is-fav svg{fill:var(--pink-dark);}
+
+  .detail-body{padding:22px 20px 30px;}
+  .detail-cat-tag{
+    display:inline-block; font-size:0.75rem; font-weight:800; padding:5px 14px;
+    border-radius:100px; margin-bottom:10px; color:var(--text);
+  }
+  .detail-title{font-size:1.5rem; margin:0 0 10px; color:var(--text); line-height:1.2;}
+  .detail-explain{font-size:0.98rem; line-height:1.6; color:var(--text-soft); margin:0 0 24px;}
+
+  .steps-title{font-size:1.05rem; color:var(--primary-dark); margin:0 0 14px;}
+  .steps-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px;}
+  .step-item{display:flex; gap:14px; align-items:flex-start;}
+  .step-num{
+    width:30px; height:30px; border-radius:50%; background:var(--primary-light); color:var(--primary-dark);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;
+  }
+  .step-text{font-size:0.95rem; line-height:1.5; color:var(--text); padding-top:4px;}
+
+  .fav-toast{
+    position:fixed; left:50%; bottom:104px; transform:translateX(-50%) translateY(20px);
+    background:var(--text); color:#fff; padding:12px 22px; border-radius:100px;
+    font-size:0.9rem; font-weight:700; opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease; z-index:60; white-space:nowrap;
+  }
+  .fav-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* category color helpers */
+  .bg-mint{background:var(--mint);} .bg-lavender{background:var(--lavender);}
+  .bg-sky{background:var(--sky);} .bg-pink{background:var(--pink);}
+  .bg-yellow{background:var(--yellow);} .bg-orange{background:var(--orange);}
+  .tag-mint{background:var(--mint);} .tag-lavender{background:var(--lavender);}
+  .tag-sky{background:var(--sky);} .tag-pink{background:var(--pink);}
+  .tag-yellow{background:var(--yellow);} .tag-orange{background:var(--orange); color:#fff;}
+
+  /* ================= Responsive ================= */
+  @media (min-width:640px){
+    .lib-grid{grid-template-columns:1fr 1fr;}
+    .lib-grid .card{flex-direction:column;}
+    .lib-grid .card-media{width:100%; height:120px;}
+  }
+  @media (min-width:1024px){
+    .sidebar{display:block;}
+    .bottom-nav, .topbar{display:none;}
+    .main-col{padding-bottom:40px;}
+    .lib-grid{grid-template-columns:1fr 1fr 1fr;}
+    .home-header, .section-block, .search-bar, .chip-row, .h-scroll{padding-left:36px; padding-right:36px;}
+    .search-bar{margin-left:36px; margin-right:36px;}
+    .detail-body{padding-left:60px; padding-right:60px; max-width:760px; margin:0 auto;}
+    .detail-header{height:260px;}
+  }
+  @media (min-width:1024px) and (max-width:1199px){
+    .lib-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== SIDEBAR (desktop) ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg class="brand-badge" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#F0DCF0" stroke="#A94DA0" stroke-width="1.5"/><path d="M12 14c0-1.6 1.4-2.6 3-2.4l5 .7 5-.7c1.6-.2 3 .8 3 2.4v11c0 1.2-1 2-2.2 1.8l-5.8-1-5.8 1C13 27 12 26.2 12 25V14z" fill="#F6E27D" stroke="#4A3B49" stroke-width="1"/><line x1="20" y1="12.5" x2="20" y2="25.5" stroke="#4A3B49" stroke-width="1"/></svg>
+      <div class="brand-name">Mi Biblioteca<br>Digital</div>
+    </div>
+    <nav>
+      <button class="side-link" data-nav="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
+        Inicio
+      </button>
+      <button class="side-link" data-nav="library">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Biblioteca
+      </button>
+      <button class="side-link" data-nav="favorites">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>
+        Favoritos
+      </button>
+    </nav>
+  </aside>
+
+  <div class="main-col">
+
+    <!-- ===================== WELCOME SCREEN ===================== -->
+    <section class="screen active" id="screen-welcome">
+      <div class="welcome-wrap">
+        <svg class="welcome-illustration" viewBox="0 0 280 240" fill="none">
+          <ellipse cx="140" cy="222" rx="95" ry="10" fill="#F0DCF0"/>
+          <rect x="30" y="150" width="220" height="60" rx="14" fill="#AEDCF7"/>
+          <rect x="30" y="150" width="220" height="14" rx="7" fill="#8FCBEE"/>
+          <rect x="55" y="168" width="70" height="8" rx="4" fill="#fff"/>
+          <rect x="55" y="182" width="45" height="8" rx="4" fill="#fff"/>
+          <circle cx="150" cy="95" r="46" fill="#F6E27D"/>
+          <path d="M104 95a46 46 0 0192 0" fill="none"/>
+          <circle cx="150" cy="55" r="24" fill="#F8C4DC"/>
+          <path d="M137 52c0-7 6-12 13-12s13 5 13 12" stroke="#4A3B49" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="144" cy="55" r="2.3" fill="#4A3B49"/>
+          <circle cx="156" cy="55" r="2.3" fill="#4A3B49"/>
+          <path d="M144 62c2 2 8 2 10 0" stroke="#4A3B49" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <rect x="118" y="76" width="64" height="52" rx="10" fill="#A94DA0"/>
+          <rect x="126" y="86" width="48" height="6" rx="3" fill="#F0DCF0"/>
+          <rect x="126" y="98" width="34" height="6" rx="3" fill="#F0DCF0"/>
+          <rect x="60" y="118" width="34" height="46" rx="6" fill="#A8E6CF" stroke="#4A3B49" stroke-width="1.5"/>
+          <rect x="66" y="126" width="22" height="4" rx="2" fill="#4A3B49" opacity=".5"/>
+          <rect x="66" y="134" width="22" height="4" rx="2" fill="#4A3B49" opacity=".5"/>
+          <rect x="188" y="112" width="30" height="52" rx="6" fill="#D3C4F2" stroke="#4A3B49" stroke-width="1.5"/>
+          <rect x="194" y="120" width="18" height="4" rx="2" fill="#4A3B49" opacity=".5"/>
+          <rect x="194" y="128" width="18" height="4" rx="2" fill="#4A3B49" opacity=".5"/>
+          <path d="M205 20l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#F5A85E"/>
+          <path d="M55 30l2 5 5 1-4 4 1 5-4-2-4 2 1-5-4-4 5-1z" fill="#F5A85E"/>
+        </svg>
+        <h1 class="welcome-title">Mi Biblioteca<br><span>Digital</span></h1>
+        <p class="welcome-sub">Tus documentos de trabajo, ordenados por fin. Encontrá planificaciones, evaluaciones y recursos en segundos, desde el celular o la computadora.</p>
+        <button class="btn-primary" id="btn-comenzar">
+          Comenzar
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <div class="welcome-tag">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Sin registro. Tus favoritos se guardan en este dispositivo.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOME SCREEN ===================== -->
+    <section class="screen" id="screen-home">
+      <div class="topbar">
+        <div class="brand">
+          <svg class="brand-badge" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#F0DCF0" stroke="#A94DA0" stroke-width="1.5"/><path d="M12 14c0-1.6 1.4-2.6 3-2.4l5 .7 5-.7c1.6-.2 3 .8 3 2.4v11c0 1.2-1 2-2.2 1.8l-5.8-1-5.8 1C13 27 12 26.2 12 25V14z" fill="#F6E27D" stroke="#4A3B49" stroke-width="1"/></svg>
+          <span class="brand-name">Mi Biblioteca Digital</span>
+        </div>
+      </div>
+      <div class="home-header">
+        <h2 class="home-greeting">Hola, docente 👋</h2>
+        <p class="home-greeting-sub">¿Qué documento estás buscando hoy?</p>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" class="search-input" id="search-home" placeholder="Buscar planificaciones, rúbricas, plantillas...">
+      </div>
+
+      <div class="section-block" style="padding-bottom:0;">
+        <h3 class="section-title">Categorías</h3>
+        <p class="section-sub">Elegí un tipo de documento</p>
+      </div>
+      <div class="chip-row" id="chip-row-home"></div>
+
+      <div class="section-block" style="margin-top:24px;">
+        <h3 class="section-title">Destacados</h3>
+        <p class="section-sub">Los más útiles para empezar a ordenar</p>
+      </div>
+      <div class="h-scroll" id="featured-row"></div>
+
+      <div class="section-block" style="margin-top:8px;">
+        <h3 class="section-title">Recientes</h3>
+        <p class="section-sub">Lo último agregado a la biblioteca</p>
+      </div>
+      <div class="h-scroll" id="recent-row"></div>
+    </section>
+
+    <!-- ===================== LIBRARY SCREEN ===================== -->
+    <section class="screen" id="screen-library">
+      <div class="topbar">
+        <div class="brand"><span class="brand-name" style="font-size:1.15rem;">Biblioteca</span></div>
+      </div>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" class="search-input" id="search-library" placeholder="Buscar en toda la biblioteca...">
+      </div>
+      <div class="chip-row" id="chip-row-library"></div>
+      <div class="lib-grid" id="library-grid" style="margin-top:18px;"></div>
+    </section>
+
+    <!-- ===================== CONTENT DETAIL SCREEN ===================== -->
+    <section class="screen" id="screen-content">
+      <div id="content-detail"></div>
+    </section>
+
+    <!-- ===================== FAVORITES SCREEN ===================== -->
+    <section class="screen" id="screen-favorites">
+      <div class="topbar">
+        <div class="brand"><span class="brand-name" style="font-size:1.15rem;">Favoritos</span></div>
+      </div>
+      <div class="section-block" style="padding-top:8px;">
+        <h3 class="section-title">Tus favoritos</h3>
+        <p class="section-sub">Contenidos guardados en este dispositivo</p>
+      </div>
+      <div class="lib-grid" id="favorites-grid"></div>
+    </section>
+
+  </div>
+
+  <!-- ===================== BOTTOM NAV (mobile/tablet) ===================== -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-btn" data-nav="home">
+      <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg></span>
+      Inicio
+    </button>
+    <button class="nav-btn" data-nav="library">
+      <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>
+      Biblioteca
+    </button>
+    <button class="nav-btn" data-nav="favorites">
+      <span class="nav-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg></span>
+      Favoritos
+    </button>
+  </nav>
+
+  <div class="fav-toast" id="fav-toast">Guardado en favoritos</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Data: categorías ---------------- */
+  var CATEGORIES = [
+    {id:"planificacion", name:"Planificación", cls:"mint", icon:"📅"},
+    {id:"evaluacion", name:"Evaluación", cls:"lavender", icon:"✅"},
+    {id:"recursos", name:"Recursos", cls:"sky", icon:"🎨"},
+    {id:"administrativo", name:"Administrativo", cls:"yellow", icon:"🗂️"},
+    {id:"comunicacion", name:"Comunicación", cls:"pink", icon:"💬"},
+    {id:"digital", name:"Herram. digitales", cls:"orange", icon:"💻"}
+  ];
+  function getCat(id){ return CATEGORIES.find(function(c){return c.id===id;}); }
+
+  /* ---------------- Data: contenidos ---------------- */
+  var CONTENT = [
+    {
+      id:"p1", cat:"planificacion", icon:"📅", featured:true, date:"2026-07-27",
+      title:"Organizá tu planificación semanal",
+      desc:"Un método simple para tener las clases de la semana ordenadas y a mano.",
+      explain:"Tener la semana planificada en un único documento, con estructura fija, evita perder tiempo buscando qué toca dar en cada clase.",
+      steps:[
+        "Creá una plantilla única con los días de la semana como columnas.",
+        "Anotá para cada clase: tema, objetivo y materiales necesarios.",
+        "Guardá el archivo con el nombre del período (por ejemplo, 'Semana 12').",
+        "Revisala los domingos y ajustá según lo que quedó pendiente."
+      ]
+    },
+    {
+      id:"p2", cat:"planificacion", icon:"🗓️", date:"2026-07-15",
+      title:"Carpetas por trimestre",
+      desc:"Cómo dividir tus documentos digitales en carpetas claras por período.",
+      explain:"Separar el material por trimestre evita que se mezclen documentos de distintas épocas del año y facilita encontrar lo que necesitás.",
+      steps:[
+        "Creá una carpeta principal llamada 'Planificaciones'.",
+        "Dentro, generá una subcarpeta por trimestre: '1er trimestre', '2do trimestre', etc.",
+        "Guardá cada planificación en la carpeta del período que corresponde.",
+        "Al cerrar el trimestre, revisá y eliminá borradores que ya no sirven."
+      ]
+    },
+    {
+      id:"e1", cat:"evaluacion", icon:"✅", featured:true, date:"2026-07-24",
+      title:"Rúbrica de evaluación de proyectos",
+      desc:"Plantilla lista para calificar trabajos grupales de forma objetiva.",
+      explain:"Una rúbrica clara ahorra tiempo al corregir y les da a los estudiantes criterios concretos antes de entregar el trabajo.",
+      steps:[
+        "Definí entre 3 y 5 criterios (por ejemplo: contenido, presentación, trabajo en equipo).",
+        "Asigná una escala del 1 al 4 para cada criterio, con una breve descripción de cada nivel.",
+        "Guardá la rúbrica como plantilla reutilizable, sin datos de un grupo en particular.",
+        "Compartila con el curso antes de la fecha de entrega."
+      ]
+    },
+    {
+      id:"e2", cat:"evaluacion", icon:"📝", date:"2026-07-10",
+      title:"Banco de exámenes ordenado",
+      desc:"Organizá tus evaluaciones por tema y nivel para reutilizarlas fácil.",
+      explain:"Un banco de preguntas bien etiquetado te permite armar un examen nuevo en minutos, combinando preguntas ya probadas.",
+      steps:[
+        "Creá un documento por tema, con las preguntas numeradas.",
+        "Etiquetá cada pregunta con su nivel de dificultad: básico, medio o avanzado.",
+        "Guardá los documentos en una carpeta llamada 'Banco de exámenes'.",
+        "Al armar una evaluación nueva, copiá las preguntas elegidas a un documento aparte."
+      ]
+    },
+    {
+      id:"r1", cat:"recursos", icon:"🎨", featured:true, date:"2026-07-26",
+      title:"Recursos didácticos por materia",
+      desc:"Cómo etiquetar y guardar materiales de clase para encontrarlos rápido.",
+      explain:"Ordenar los recursos por materia y tema, en lugar de por fecha de descarga, es lo que realmente ahorra tiempo a la hora de dar clase.",
+      steps:[
+        "Creá una carpeta por materia dentro de 'Recursos didácticos'.",
+        "Dentro de cada materia, agrupá por tema o unidad.",
+        "Nombrá cada archivo describiendo el contenido, no solo con números.",
+        "Sumá una breve nota en el nombre si el recurso incluye actividad o solo teoría."
+      ]
+    },
+    {
+      id:"r2", cat:"recursos", icon:"🖼️", date:"2026-07-05",
+      title:"Biblioteca de imágenes educativas",
+      desc:"Organizá recursos visuales para tus clases sin perder tiempo buscando.",
+      explain:"Las imágenes y láminas se acumulan rápido. Separarlas por tema evita terminar con una sola carpeta imposible de revisar.",
+      steps:[
+        "Creá una carpeta 'Imágenes' dentro de cada materia.",
+        "Usá subcarpetas por tema: por ejemplo, 'Sistema solar', 'Mapas', 'Figuras geométricas'.",
+        "Renombrá los archivos con el nombre del tema en vez de dejar el nombre original.",
+        "Eliminá duplicados cada cierto tiempo para no saturar el almacenamiento."
+      ]
+    },
+    {
+      id:"a1", cat:"administrativo", icon:"🗂️", date:"2026-07-18",
+      title:"Plantillas de actas y registros",
+      desc:"Modelos listos para completar en reuniones y seguimientos.",
+      explain:"Tener un modelo fijo de acta agiliza las reuniones y asegura que no falte ningún dato importante.",
+      steps:[
+        "Armá una plantilla con encabezado: fecha, participantes y motivo.",
+        "Dejá un espacio fijo para acuerdos y otro para tareas pendientes.",
+        "Guardala como plantilla base, sin completar, en 'Administrativo > Plantillas'.",
+        "Cada vez que la uses, guardá una copia con la fecha en el nombre."
+      ]
+    },
+    {
+      id:"a2", cat:"administrativo", icon:"📋", date:"2026-06-30",
+      title:"Control de asistencia digital",
+      desc:"Una planilla simple para llevar la asistencia sin papeles sueltos.",
+      explain:"Pasar la asistencia a un archivo digital único evita hojas sueltas y facilita sacar totales al final del mes.",
+      steps:[
+        "Armá una planilla con los nombres del curso en filas y las fechas en columnas.",
+        "Marcá presente, ausente o tarde con un código corto (P, A, T).",
+        "Guardá una copia mensual con el nombre del curso y el mes.",
+        "Revisá el total de inasistencias antes de cada reunión de padres."
+      ]
+    },
+    {
+      id:"c1", cat:"comunicacion", icon:"💬", featured:true, date:"2026-07-12",
+      title:"Modelos de mensajes para familias",
+      desc:"Textos base para comunicarte de forma clara y profesional.",
+      explain:"Tener modelos de mensaje ya redactados ahorra tiempo y ayuda a mantener siempre el mismo tono profesional.",
+      steps:[
+        "Redactá un modelo para cada situación frecuente: aviso, felicitación, citación.",
+        "Dejá espacios marcados para completar con el nombre y la fecha.",
+        "Guardá los modelos en una carpeta llamada 'Comunicación > Modelos'.",
+        "Adaptá el modelo elegido antes de enviarlo, sin modificar el original."
+      ]
+    },
+    {
+      id:"c2", cat:"comunicacion", icon:"📢", date:"2026-06-28",
+      title:"Circulares y avisos ordenados",
+      desc:"Cómo archivar tus comunicados para encontrarlos cuando los necesites.",
+      explain:"Guardar cada circular enviada te permite responder rápido si una familia pregunta por un aviso anterior.",
+      steps:[
+        "Creá una carpeta 'Circulares' ordenada por mes.",
+        "Guardá cada aviso enviado con la fecha al inicio del nombre del archivo.",
+        "Sumá una lista simple con el resumen de cada circular del mes.",
+        "Revisá la carpeta antes de enviar un aviso nuevo, para no repetir información."
+      ]
+    },
+    {
+      id:"d1", cat:"digital", icon:"☁️", date:"2026-07-08",
+      title:"Nube vs. computadora: qué guardar dónde",
+      desc:"Guía para decidir dónde conviene almacenar cada tipo de documento.",
+      explain:"No todo necesita estar en la nube. Elegir bien dónde guardar cada cosa evita perder tiempo buscando o quedarte sin espacio.",
+      steps:[
+        "Guardá en la nube lo que necesitás compartir o abrir desde varios dispositivos.",
+        "Dejá en tu computadora los archivos pesados que usás solo vos.",
+        "Sincronizá una sola carpeta principal de trabajo, para no duplicar versiones.",
+        "Hacé una copia de seguridad mensual de ambos lugares."
+      ]
+    },
+    {
+      id:"d2", cat:"digital", icon:"💻", featured:true, date:"2026-07-28",
+      title:"Nombres de archivo que funcionan",
+      desc:"Un sistema simple para nombrar tus documentos y no perder nada.",
+      explain:"Un buen nombre de archivo es la diferencia entre encontrar un documento en dos segundos o buscarlo durante media hora.",
+      steps:[
+        "Empezá el nombre por la fecha o el número de unidad, así se ordenan solos.",
+        "Sumá una palabra clave del contenido: materia, tema o tipo de documento.",
+        "Evitá nombres genéricos como 'Documento1' o 'Final(2)'.",
+        "Usá siempre el mismo formato en toda tu biblioteca de archivos."
+      ]
+    }
+  ];
+
+  /* ---------------- Favoritos (localStorage) ---------------- */
+  var FAV_KEY = "miBibliotecaDigital.favoritos";
+  function getFavorites(){
+    try{
+      var raw = localStorage.getItem(FAV_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function isFavorite(id){ return getFavorites().indexOf(id) !== -1; }
+  function toggleFavorite(id){
+    var favs = getFavorites();
+    var idx = favs.indexOf(id);
+    var added;
+    if(idx === -1){ favs.push(id); added = true; }
+    else{ favs.splice(idx,1); added = false; }
+    try{ localStorage.setItem(FAV_KEY, JSON.stringify(favs)); }catch(e){}
+    return added;
+  }
+
+  /* ---------------- Helpers de render ---------------- */
+  function esc(str){
+    var d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function heartIcon(filled){
+    return '<svg viewBox="0 0 24 24" fill="'+(filled?"currentColor":"none")+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>';
+  }
+
+  function makeChip(cat, activeId){
+    return '<button class="chip bg-'+cat.cls+(cat.id===activeId?' active':'')+'" data-cat="'+cat.id+'">'+
+      '<span class="chip-icon">'+cat.icon+'</span>'+cat.name+'</button>';
+  }
+
+  function makeMiniCard(item, wide){
+    var cat = getCat(item.cat);
+    return '<div class="card '+(wide?"featured-card":"recent-card")+'" data-open="'+item.id+'">'+
+      '<div class="card-media bg-'+cat.cls+'">'+
+        '<span class="card-cat-tag">'+cat.name+'</span>'+
+        '<button class="fav-btn-mini" data-fav="'+item.id+'" aria-label="Marcar como favorito">'+heartIcon(isFavorite(item.id))+'</button>'+
+        item.icon+
+      '</div>'+
+      '<div class="card-body">'+
+        '<h4 class="card-title">'+esc(item.title)+'</h4>'+
+        '<p class="card-desc">'+esc(item.desc)+'</p>'+
+        '<button class="card-cta" data-open="'+item.id+'">Ver contenido '+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function makeLibraryCard(item){
+    var cat = getCat(item.cat);
+    return '<div class="card" data-open="'+item.id+'">'+
+      '<div class="card-media bg-'+cat.cls+'">'+
+        '<button class="fav-btn-mini" data-fav="'+item.id+'" aria-label="Marcar como favorito">'+heartIcon(isFavorite(item.id))+'</button>'+
+        item.icon+
+      '</div>'+
+      '<div class="card-body">'+
+        '<span class="card-cat-tag tag-'+cat.cls+'" style="align-self:flex-start;">'+cat.name+'</span>'+
+        '<h4 class="card-title">'+esc(item.title)+'</h4>'+
+        '<p class="card-desc">'+esc(item.desc)+'</p>'+
+        '<button class="card-cta" data-open="'+item.id+'">Ver contenido '+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function emptyState(icon, title, msg){
+    return '<div class="empty-state">'+icon+
+      '<p><strong>'+esc(title)+'</strong></p><p>'+esc(msg)+'</p></div>';
+  }
+
+  var FOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 006.5 22H18a2 2 0 002-2V8a2 2 0 00-2-2h-6l-2-2H4v15.5z"/></svg>';
+  var SEARCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
+
+  /* ---------------- Estado ---------------- */
+  var state = { homeCat:null, libCat:null, homeQuery:"", libQuery:"", currentItem:null, lastScreen:"home" };
+
+  /* ---------------- Render: Home ---------------- */
+  function renderHomeChips(){
+    var html = CATEGORIES.map(function(c){ return makeChip(c, state.homeCat); }).join("");
+    document.getElementById("chip-row-home").innerHTML = html;
+  }
+  function renderFeatured(){
+    var items = CONTENT.filter(function(i){ return i.featured; });
+    document.getElementById("featured-row").innerHTML = items.map(function(i){ return makeMiniCard(i, true); }).join("");
+  }
+  function renderRecent(){
+    var items = CONTENT.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }).slice(0,6);
+    document.getElementById("recent-row").innerHTML = items.map(function(i){ return makeMiniCard(i, false); }).join("");
+  }
+
+  /* ---------------- Render: Library ---------------- */
+  function renderLibraryChips(){
+    var html = CATEGORIES.map(function(c){ return makeChip(c, state.libCat); }).join("");
+    document.getElementById("chip-row-library").innerHTML = html;
+  }
+  function renderLibraryGrid(){
+    var items = CONTENT.filter(function(i){
+      var matchCat = !state.libCat || i.cat === state.libCat;
+      var q = state.libQuery.trim().toLowerCase();
+      var matchQuery = !q || i.title.toLowerCase().indexOf(q) !== -1 || i.desc.toLowerCase().indexOf(q) !== -1;
+      return matchCat && matchQuery;
+    });
+    var el = document.getElementById("library-grid");
+    if(items.length === 0){
+      el.innerHTML = emptyState(FOLDER_SVG, "No encontramos nada", "Probá con otra palabra o elegí otra categoría.");
+    }else{
+      el.innerHTML = items.map(makeLibraryCard).join("");
+    }
+  }
+
+  /* ---------------- Render: Favoritos ---------------- */
+  function renderFavorites(){
+    var favs = getFavorites();
+    var items = CONTENT.filter(function(i){ return favs.indexOf(i.id) !== -1; });
+    var el = document.getElementById("favorites-grid");
+    if(items.length === 0){
+      el.innerHTML = emptyState(heartIcon(false), "Todavía no tenés favoritos", "Tocá el corazón en cualquier contenido para guardarlo acá.");
+    }else{
+      el.innerHTML = items.map(makeLibraryCard).join("");
+    }
+  }
+
+  /* ---------------- Render: Detalle ---------------- */
+  function renderContent(id){
+    var item = CONTENT.find(function(i){ return i.id === id; });
+    if(!item) return;
+    state.currentItem = id;
+    var cat = getCat(item.cat);
+    var fav = isFavorite(id);
+    var stepsHtml = item.steps.map(function(s, idx){
+      return '<li class="step-item"><span class="step-num">'+(idx+1)+'</span><span class="step-text">'+esc(s)+'</span></li>';
+    }).join("");
+
+    document.getElementById("content-detail").innerHTML =
+      '<div class="detail-header bg-'+cat.cls+'">'+
+        '<button class="back-btn" id="btn-back-detail" aria-label="Volver">'+
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>'+
+        '<button class="fav-btn-lg'+(fav?" is-fav":"")+'" id="btn-fav-detail" aria-label="Marcar como favorito">'+heartIcon(fav)+'</button>'+
+        item.icon+
+      '</div>'+
+      '<div class="detail-body">'+
+        '<span class="detail-cat-tag tag-'+cat.cls+'">'+cat.name+'</span>'+
+        '<h2 class="detail-title">'+esc(item.title)+'</h2>'+
+        '<p class="detail-explain">'+esc(item.explain)+'</p>'+
+        '<h3 class="steps-title">Pasos a seguir</h3>'+
+        '<ul class="steps-list">'+stepsHtml+'</ul>'+
+      '</div>';
+  }
+
+  /* ---------------- Navegación ---------------- */
+  var SCREENS = ["welcome","home","library","content","favorites"];
+  function showScreen(name){
+    SCREENS.forEach(function(s){
+      document.getElementById("screen-"+s).classList.toggle("active", s === name);
+    });
+    if(name !== "content") state.lastScreen = name;
+    document.querySelectorAll(".nav-btn, .side-link").forEach(function(btn){
+      btn.classList.toggle("active", btn.getAttribute("data-nav") === name);
+    });
+    document.getElementById("bottom-nav").style.display = (name === "welcome") ? "none" : "";
+    if(name === "home"){ renderHomeChips(); renderFeatured(); renderRecent(); }
+    if(name === "library"){ renderLibraryChips(); renderLibraryGrid(); }
+    if(name === "favorites"){ renderFavorites(); }
+    window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+  }
+
+  function openContent(id){
+    renderContent(id);
+    SCREENS.forEach(function(s){
+      document.getElementById("screen-"+s).classList.toggle("active", s === "content");
+    });
+    document.getElementById("bottom-nav").style.display = "none";
+    window.scrollTo(0,0);
+  }
+
+  var toastTimer = null;
+  function showToast(text){
+    var t = document.getElementById("fav-toast");
+    t.textContent = text;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 1800);
+  }
+
+  /* ---------------- Eventos ---------------- */
+  document.getElementById("btn-comenzar").addEventListener("click", function(){
+    showScreen("home");
+  });
+
+  document.querySelectorAll("[data-nav]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      showScreen(btn.getAttribute("data-nav"));
+    });
+  });
+
+  document.getElementById("search-home").addEventListener("input", function(e){
+    state.libQuery = e.target.value;
+    state.libCat = null;
+    showScreen("library");
+  });
+  document.getElementById("search-library").addEventListener("input", function(e){
+    state.libQuery = e.target.value;
+    renderLibraryGrid();
+  });
+
+  document.getElementById("chip-row-home").addEventListener("click", function(e){
+    var chip = e.target.closest("[data-cat]");
+    if(!chip) return;
+    state.libCat = chip.getAttribute("data-cat");
+    state.libQuery = "";
+    showScreen("library");
+  });
+  document.getElementById("chip-row-library").addEventListener("click", function(e){
+    var chip = e.target.closest("[data-cat]");
+    if(!chip) return;
+    var cat = chip.getAttribute("data-cat");
+    state.libCat = (state.libCat === cat) ? null : cat;
+    renderLibraryChips();
+    renderLibraryGrid();
+  });
+
+  document.getElementById("app").addEventListener("click", function(e){
+    var favBtn = e.target.closest("[data-fav]");
+    if(favBtn){
+      var added = toggleFavorite(favBtn.getAttribute("data-fav"));
+      showToast(added ? "Guardado en favoritos" : "Quitado de favoritos");
+      var active = document.querySelector(".screen.active").id;
+      if(active === "screen-home"){ renderFeatured(); renderRecent(); }
+      if(active === "screen-library"){ renderLibraryGrid(); }
+      if(active === "screen-favorites"){ renderFavorites(); }
+      return;
+    }
+    var openBtn = e.target.closest("[data-open]");
+    if(openBtn){
+      openContent(openBtn.getAttribute("data-open"));
+      return;
+    }
+  });
+
+  document.getElementById("content-detail").addEventListener("click", function(e){
+    if(e.target.closest("#btn-back-detail")){
+      showScreen(state.lastScreen);
+    }
+    if(e.target.closest("#btn-fav-detail")){
+      var added = toggleFavorite(state.currentItem);
+      showToast(added ? "Guardado en favoritos" : "Quitado de favoritos");
+      renderContent(state.currentItem);
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
