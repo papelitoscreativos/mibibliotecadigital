@@ -108,6 +108,11 @@
     padding:12px 14px; border-radius:var(--radius-sm); font-weight:800; font-size:0.95rem;
     display:flex; align-items:center; gap:10px;
   }
+  .sidebar .side-logout{
+    margin-top:8px; background:none; color:var(--text-soft); border:none;
+    padding:12px 14px; border-radius:var(--radius-sm); font-weight:700; font-size:0.9rem;
+    display:flex; align-items:center; gap:10px;
+  }
 
   /* ---------- Top bar (mobile/tablet) ---------- */
   .topbar{
@@ -117,6 +122,12 @@
   .topbar .brand{display:flex; align-items:center; gap:10px;}
   .topbar .brand-badge{width:34px;height:34px;}
   .topbar .brand-name{font-weight:700; font-size:1rem; color:var(--primary-dark);}
+  .topbar-icon-btn{
+    width:38px; height:38px; border-radius:50%; border:none;
+    background:var(--primary-light); color:var(--primary-dark);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .topbar-icon-btn svg{width:18px;height:18px;}
 
   /* ---------- Bottom nav (mobile/tablet) ---------- */
   .bottom-nav{
@@ -150,8 +161,8 @@
   .fab.hidden{display:none;}
   @media (min-width:1024px){ .fab{bottom:28px; right:36px;} }
 
-  /* ================= WELCOME ================= */
-  .welcome-wrap{
+  /* ================= WELCOME / LOGIN ================= */
+  .welcome-wrap, .login-wrap{
     min-height:100vh; display:flex; flex-direction:column;
     align-items:center; justify-content:center;
     padding:40px 28px 48px; text-align:center;
@@ -182,15 +193,19 @@
   }
   .btn-primary:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(169,77,160,0.4);}
   .btn-primary:active{transform:translateY(0);}
-  .btn-secondary{
-    background:var(--primary-light); color:var(--primary-dark); border:none;
-    padding:13px 26px; border-radius:100px; font-size:0.95rem; font-weight:800;
-    display:inline-flex; align-items:center; gap:8px;
-  }
+  .btn-primary:disabled{opacity:0.7; transform:none; cursor:default;}
   .welcome-tag{
     margin-top:34px; font-size:0.85rem; color:var(--text-soft);
     display:flex; align-items:center; gap:8px;
   }
+
+  .login-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:34px 28px; width:100%; max-width:380px; text-align:left;
+  }
+  .login-card h2{font-size:1.4rem; color:var(--primary-dark); margin:14px 0 4px; text-align:center;}
+  .login-card .login-sub{color:var(--text-soft); font-size:0.92rem; margin:0 0 22px; text-align:center;}
+  .login-badge-wrap{display:flex; justify-content:center;}
 
   /* ================= SECTION HEADERS ================= */
   .section-title{
@@ -438,6 +453,10 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       Agregar contenido
     </button>
+    <button class="side-logout" id="side-logout-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Cerrar sesión
+    </button>
   </aside>
 
   <div class="main-col">
@@ -478,7 +497,28 @@
         </button>
         <div class="welcome-tag">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          Sin registro. Todo se guarda en este dispositivo.
+          Acceso con usuario y contraseña. Se sincroniza entre tus dispositivos.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LOGIN SCREEN ===================== -->
+    <section class="screen" id="screen-login">
+      <div class="login-wrap">
+        <div class="login-card">
+          <div class="login-badge-wrap">
+            <svg class="brand-badge" width="46" height="46" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#F0DCF0" stroke="#A94DA0" stroke-width="1.5"/><path d="M12 14c0-1.6 1.4-2.6 3-2.4l5 .7 5-.7c1.6-.2 3 .8 3 2.4v11c0 1.2-1 2-2.2 1.8l-5.8-1-5.8 1C13 27 12 26.2 12 25V14z" fill="#F6E27D" stroke="#4A3B49" stroke-width="1"/></svg>
+          </div>
+          <h2>Iniciar sesión</h2>
+          <p class="login-sub">Ingresá con el usuario y contraseña que te dieron.</p>
+          <form id="login-form">
+            <label class="field-label" for="login-email" style="margin-top:0;">Correo electrónico</label>
+            <input type="email" id="login-email" class="text-input" autocomplete="username" required>
+            <label class="field-label" for="login-password">Contraseña</label>
+            <input type="password" id="login-password" class="text-input" autocomplete="current-password" required>
+            <p class="field-error" id="login-error" style="display:none;"></p>
+            <button type="submit" class="btn-primary" style="width:100%; margin-top:22px;">Ingresar</button>
+          </form>
         </div>
       </div>
     </section>
@@ -490,6 +530,9 @@
           <svg class="brand-badge" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#F0DCF0" stroke="#A94DA0" stroke-width="1.5"/><path d="M12 14c0-1.6 1.4-2.6 3-2.4l5 .7 5-.7c1.6-.2 3 .8 3 2.4v11c0 1.2-1 2-2.2 1.8l-5.8-1-5.8 1C13 27 12 26.2 12 25V14z" fill="#F6E27D" stroke="#4A3B49" stroke-width="1"/></svg>
           <span class="brand-name">Mi Biblioteca Digital</span>
         </div>
+        <button type="button" class="topbar-icon-btn" id="topbar-logout-btn" aria-label="Cerrar sesión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
       </div>
       <div class="home-header">
         <h2 class="home-greeting">Hola, docente 👋</h2>
@@ -558,7 +601,7 @@
       </div>
       <div class="section-block" style="padding-top:8px;">
         <h3 class="section-title">Tus favoritos</h3>
-        <p class="section-sub">Contenidos guardados en este dispositivo</p>
+        <p class="section-sub">Contenidos guardados en tu cuenta</p>
       </div>
       <div class="lib-grid" id="favorites-grid"></div>
     </section>
@@ -587,7 +630,7 @@
           </label>
           <input type="file" id="input-archivo" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv" hidden>
           <div id="file-preview"></div>
-          <p class="field-hint">Se guarda en este dispositivo. Recomendado: archivos de menos de 5 MB.</p>
+          <p class="field-hint">Se guarda en tu cuenta y se sincroniza entre tus dispositivos.</p>
         </div>
 
         <div id="field-enlace" style="display:none; margin-top:14px;">
@@ -629,8 +672,33 @@
   <div class="fav-toast" id="fav-toast">Guardado en favoritos</div>
 </div>
 
-<script>
-(function(){
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, setDoc, getDocs, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+  import {
+    getStorage, ref, uploadBytes, getDownloadURL, deleteObject
+  } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-storage.js";
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyCzvwLSFkVlNHP5WlIaY6GQCGK0pL4wbcE",
+    authDomain: "mi-biblioteca-digital-e387b.firebaseapp.com",
+    projectId: "mi-biblioteca-digital-e387b",
+    storageBucket: "mi-biblioteca-digital-e387b.firebasestorage.app",
+    messagingSenderId: "813389749866",
+    appId: "1:813389749866:web:d6ba2d1d98c66c9d5d3413"
+  };
+
+  var fbApp = initializeApp(firebaseConfig);
+  var auth = getAuth(fbApp);
+  var db = getFirestore(fbApp);
+  var storage = getStorage(fbApp);
+
+  (function(){
   "use strict";
 
   /* ---------------- Categorías ---------------- */
@@ -644,77 +712,54 @@
   ];
   function getCat(id){ return CATEGORIES.find(function(c){return c.id===id;}) || CATEGORIES[0]; }
 
-  /* ---------------- IndexedDB ---------------- */
-  var DB_NAME = "miBibliotecaDigitalDB";
-  var DB_VERSION = 1;
-  var STORE = "documentos";
-  var dbPromise = null;
-
-  function openDB(){
-    if(dbPromise) return dbPromise;
-    dbPromise = new Promise(function(resolve, reject){
-      var req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = function(e){
-        var db = e.target.result;
-        if(!db.objectStoreNames.contains(STORE)){
-          db.createObjectStore(STORE, {keyPath:"id"});
-        }
-      };
-      req.onsuccess = function(){ resolve(req.result); };
-      req.onerror = function(){ reject(req.error); };
-    });
-    return dbPromise;
+  /* ---------------- Firestore + Storage ---------------- */
+  function itemsCollectionRef(){
+    return collection(db, "usuarios", state.uid, "documentos");
   }
-  function dbPut(item){
-    return openDB().then(function(db){
-      return new Promise(function(resolve, reject){
-        var tx = db.transaction(STORE, "readwrite");
-        tx.objectStore(STORE).put(item);
-        tx.oncomplete = function(){ resolve(item); };
-        tx.onerror = function(){ reject(tx.error); };
-      });
-    });
+  function itemDocRef(id){
+    return doc(db, "usuarios", state.uid, "documentos", id);
   }
   function dbGetAll(){
-    return openDB().then(function(db){
-      return new Promise(function(resolve, reject){
-        var tx = db.transaction(STORE, "readonly");
-        var req = tx.objectStore(STORE).getAll();
-        req.onsuccess = function(){ resolve(req.result || []); };
-        req.onerror = function(){ reject(req.error); };
-      });
+    return getDocs(itemsCollectionRef()).then(function(snap){
+      var arr = [];
+      snap.forEach(function(d){ arr.push(d.data()); });
+      return arr;
     });
   }
-  function dbDelete(id){
-    return openDB().then(function(db){
-      return new Promise(function(resolve, reject){
-        var tx = db.transaction(STORE, "readwrite");
-        tx.objectStore(STORE).delete(id);
-        tx.oncomplete = function(){ resolve(); };
-        tx.onerror = function(){ reject(tx.error); };
+  function dbSaveItem(item, fileToUpload){
+    var p = Promise.resolve();
+    if(fileToUpload){
+      var path = "usuarios/"+state.uid+"/documentos/"+item.id+"/"+fileToUpload.name;
+      var storageRef = ref(storage, path);
+      p = uploadBytes(storageRef, fileToUpload).then(function(){
+        return getDownloadURL(storageRef);
+      }).then(function(url){
+        item.archivoUrl = url;
+        item.archivoPath = path;
       });
-    });
+    }
+    return p.then(function(){ return setDoc(itemDocRef(item.id), item); });
+  }
+  function dbUpdateItem(item){
+    return setDoc(itemDocRef(item.id), item);
+  }
+  function dbDeleteItem(item){
+    var p = Promise.resolve();
+    if(item.archivoPath){
+      p = deleteObject(ref(storage, item.archivoPath)).catch(function(){});
+    }
+    return p.then(function(){ return deleteDoc(itemDocRef(item.id)); });
   }
 
   /* ---------------- Estado ---------------- */
   var state = {
+    uid:null,
     homeCat:null, libCat:null, libQuery:"",
     currentItemId:null, lastScreen:"home",
-    items:[], dbReady:false,
-    addSelectedCat:null, addType:"archivo", addFile:null, addOrigin:"home"
+    items:[],
+    addSelectedCat:null, addType:"archivo", addFile:null, addOrigin:"home",
+    addPreviewUrl:null
   };
-
-  var objectUrlCache = {};
-  function getObjectUrl(item){
-    if(!item.archivo) return "";
-    if(!objectUrlCache[item.id]){
-      objectUrlCache[item.id] = URL.createObjectURL(item.archivo);
-    }
-    return objectUrlCache[item.id];
-  }
-  function revokeObjectUrl(id){
-    if(objectUrlCache[id]){ URL.revokeObjectURL(objectUrlCache[id]); delete objectUrlCache[id]; }
-  }
 
   function fileIcon(name){
     if(!name) return "📁";
@@ -743,8 +788,8 @@
   var FOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 006.5 22H18a2 2 0 002-2V8a2 2 0 00-2-2h-6l-2-2H4v15.5z"/></svg>';
 
   function mediaMarkup(item){
-    if(isImageItem(item)){
-      return '<img src="'+getObjectUrl(item)+'" alt="">';
+    if(isImageItem(item) && item.archivoUrl){
+      return '<img src="'+item.archivoUrl+'" alt="">';
     }
     if(item.tipo === "enlace"){
       return '<span>🔗</span>';
@@ -803,7 +848,6 @@
   function loadItems(){
     return dbGetAll().then(function(items){
       state.items = items;
-      state.dbReady = true;
       return items;
     });
   }
@@ -884,7 +928,7 @@
     var cat = getCat(item.categoria);
     var fav = !!item.favorito;
 
-    var headerInner = isImageItem(item) ? ('<img src="'+getObjectUrl(item)+'" alt="">') :
+    var headerInner = (isImageItem(item) && item.archivoUrl) ? ('<img src="'+item.archivoUrl+'" alt="">') :
       (item.tipo === "enlace" ? "🔗" : fileIcon(item.nombreArchivo));
 
     var actionBtn = "";
@@ -892,14 +936,13 @@
       actionBtn = '<a class="btn-primary" href="'+esc(item.enlace)+'" target="_blank" rel="noopener">'+
         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v5a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h5"/></svg>'+
         ' Abrir enlace</a>';
-    }else if(item.archivo){
-      var url = getObjectUrl(item);
+    }else if(item.archivoUrl){
       if(isImageItem(item)){
-        actionBtn = '<a class="btn-primary" href="'+url+'" target="_blank" rel="noopener">'+
+        actionBtn = '<a class="btn-primary" href="'+item.archivoUrl+'" target="_blank" rel="noopener">'+
           '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/></svg>'+
           ' Ver foto completa</a>';
       }else{
-        actionBtn = '<a class="btn-primary" href="'+url+'" download="'+esc(item.nombreArchivo||"archivo")+'">'+
+        actionBtn = '<a class="btn-primary" href="'+item.archivoUrl+'" target="_blank" rel="noopener" download="'+esc(item.nombreArchivo||"archivo")+'">'+
           '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>'+
           ' Abrir / descargar archivo</a>';
       }
@@ -933,6 +976,7 @@
   function resetAddForm(){
     state.addType = "archivo";
     state.addFile = null;
+    if(state.addPreviewUrl){ URL.revokeObjectURL(state.addPreviewUrl); state.addPreviewUrl = null; }
     document.getElementById("input-titulo").value = "";
     document.getElementById("input-descripcion").value = "";
     document.getElementById("input-enlace").value = "";
@@ -943,6 +987,9 @@
     document.getElementById("field-enlace").style.display = "none";
     document.querySelectorAll(".type-btn").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-type") === "archivo"); });
     document.getElementById("add-error").style.display = "none";
+    var submitBtn = document.querySelector("#add-form button[type='submit']");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Guardar";
   }
   function openAdd(presetCat, origin){
     state.addSelectedCat = presetCat || null;
@@ -958,18 +1005,19 @@
   }
 
   /* ---------------- Navegación ---------------- */
-  var SCREENS = ["welcome","home","library","content","favorites","add"];
+  var SCREENS = ["welcome","login","home","library","content","favorites","add"];
+  var NAV_SCREENS = {home:1, library:1, favorites:1};
   function showScreen(name){
     SCREENS.forEach(function(s){
       document.getElementById("screen-"+s).classList.toggle("active", s === name);
     });
-    if(name !== "content" && name !== "add") state.lastScreen = name;
+    if(NAV_SCREENS[name]) state.lastScreen = name;
     document.querySelectorAll(".nav-btn, .side-link").forEach(function(btn){
       btn.classList.toggle("active", btn.getAttribute("data-nav") === name);
     });
-    document.getElementById("bottom-nav").style.display = (name === "welcome") ? "none" : "";
+    document.getElementById("bottom-nav").style.display = NAV_SCREENS[name] ? "" : "none";
     var fab = document.getElementById("fab-add");
-    fab.classList.toggle("hidden", !(name === "home" || name === "library" || name === "favorites"));
+    fab.classList.toggle("hidden", !NAV_SCREENS[name]);
     if(name === "home"){ renderHome(); }
     if(name === "library"){ renderLibraryChips(); renderLibraryGrid(); }
     if(name === "favorites"){ renderFavorites(); }
@@ -1007,16 +1055,55 @@
     var item = state.items.find(function(i){ return i.id === id; });
     if(!item) return Promise.resolve(false);
     item.favorito = !item.favorito;
-    return dbPut(item).then(function(){ return item.favorito; });
+    return dbUpdateItem(item).then(function(){ return item.favorito; });
   }
+
+  /* ---------------- Autenticación ---------------- */
+  onAuthStateChanged(auth, function(user){
+    state.uid = user ? user.uid : null;
+  });
+
+  function doLogout(){
+    signOut(auth).then(function(){
+      state.items = [];
+      state.uid = null;
+      showScreen("welcome");
+    });
+  }
+  document.getElementById("side-logout-btn").addEventListener("click", doLogout);
+  document.getElementById("topbar-logout-btn").addEventListener("click", doLogout);
+
+  document.getElementById("login-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = document.getElementById("login-email").value.trim();
+    var pass = document.getElementById("login-password").value;
+    var errorEl = document.getElementById("login-error");
+    errorEl.style.display = "none";
+    var btn = e.target.querySelector("button[type='submit']");
+    btn.disabled = true;
+    btn.textContent = "Ingresando...";
+    signInWithEmailAndPassword(auth, email, pass).then(function(){
+      return loadItems();
+    }).then(function(){
+      btn.disabled = false;
+      btn.textContent = "Ingresar";
+      document.getElementById("login-password").value = "";
+      showScreen("home");
+    }).catch(function(err){
+      btn.disabled = false;
+      btn.textContent = "Ingresar";
+      errorEl.textContent = "Usuario o contraseña incorrectos.";
+      errorEl.style.display = "block";
+    });
+  });
 
   /* ---------------- Eventos: navegación principal ---------------- */
   document.getElementById("btn-comenzar").addEventListener("click", function(){
-    loadItems().then(function(){ showScreen("home"); }).catch(function(){
-      state.dbReady = false;
-      showScreen("home");
-      window.alert("Este navegador no permite guardar archivos en este momento (por ejemplo, por estar en modo incógnito, o por abrirse dentro de una vista previa restringida). Abrí la app desde su dirección publicada (por ejemplo, GitHub Pages) para que el guardado funcione.");
-    });
+    if(auth.currentUser){
+      loadItems().then(function(){ showScreen("home"); });
+    }else{
+      showScreen("login");
+    }
   });
 
   document.querySelectorAll("[data-nav]").forEach(function(btn){
@@ -1095,9 +1182,9 @@
     if(e.target.closest("#btn-delete-detail")){
       var ok = window.confirm("¿Eliminar este contenido de tu biblioteca? Esta acción no se puede deshacer.");
       if(!ok) return;
-      var id = state.currentItemId;
-      dbDelete(id).then(function(){
-        revokeObjectUrl(id);
+      var item = state.items.find(function(i){ return i.id === state.currentItemId; });
+      if(!item) return;
+      dbDeleteItem(item).then(function(){
         return loadItems();
       }).then(function(){
         showToast("Eliminado");
@@ -1132,6 +1219,7 @@
     var file = e.target.files && e.target.files[0];
     state.addFile = file || null;
     var preview = document.getElementById("file-preview");
+    if(state.addPreviewUrl){ URL.revokeObjectURL(state.addPreviewUrl); state.addPreviewUrl = null; }
     if(!file){
       preview.innerHTML = "";
       document.getElementById("file-drop-text").textContent = "Tocá para elegir una foto o un archivo";
@@ -1139,8 +1227,8 @@
     }
     document.getElementById("file-drop-text").textContent = "Cambiar archivo elegido";
     if(file.type.indexOf("image/") === 0){
-      var url = URL.createObjectURL(file);
-      preview.innerHTML = '<img src="'+url+'" alt="">';
+      state.addPreviewUrl = URL.createObjectURL(file);
+      preview.innerHTML = '<img src="'+state.addPreviewUrl+'" alt="">';
     }else{
       preview.innerHTML = '<div class="file-chip">'+fileIcon(file.name)+' <span>'+esc(file.name)+' · '+formatSize(file.size)+'</span></div>';
     }
@@ -1185,8 +1273,9 @@
       favorito: false,
       fecha: new Date().toISOString()
     };
+    var fileToUpload = null;
     if(state.addType === "archivo"){
-      item.archivo = state.addFile;
+      fileToUpload = state.addFile;
       item.nombreArchivo = state.addFile.name;
       item.mimeArchivo = state.addFile.type;
       item.tamanioArchivo = state.addFile.size;
@@ -1194,19 +1283,27 @@
       item.enlace = enlace;
     }
 
-    dbPut(item).then(function(){ return loadItems(); }).then(function(){
+    var submitBtn = e.target.querySelector("button[type='submit']");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Guardando...";
+
+    dbSaveItem(item, fileToUpload).then(function(){ return loadItems(); }).then(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Guardar";
       showToast("Guardado en tu biblioteca");
       state.libCat = item.categoria;
       state.libQuery = "";
       showScreen("library");
-    }).catch(function(){
-      errorEl.textContent = "No se pudo guardar. Probá abrir la app desde su dirección publicada (por ejemplo, GitHub Pages) en vez de esta vista previa, o revisá que el archivo no sea demasiado pesado.";
+    }).catch(function(err){
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Guardar";
+      errorEl.textContent = "No se pudo guardar. Revisá tu conexión e intentá de nuevo.";
       errorEl.style.display = "block";
+      console.error(err);
     });
   });
 
-})();
+  })();
 </script>
 </body>
 </html>
-
